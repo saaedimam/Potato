@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Moon, Sun } from 'lucide-react'
+import Link from 'next/link'
 
-function cx() { return Array.from(arguments).filter(Boolean).join(' ') }
+function cx(...args: unknown[]): string {
+  return args.filter(Boolean).join(' ')
+}
 
 const profile = {
   name: 'Saaed Imam',
@@ -42,18 +45,18 @@ function ThemeToggle(){
 
 function Header(){
   const [open,setOpen] = useState(false)
-  const dialogRef = useRef(null)
+  const dialogRef = useRef<HTMLDivElement | null>(null)
   useEffect(()=>{
-    function onKey(e){ const isCmdK = String(e.key).toLowerCase()==='k' && (e.metaKey||e.ctrlKey); if(e.key==='/'||isCmdK){e.preventDefault();setOpen(true)}; if(e.key==='Escape') setOpen(false) }
+    function onKey(e: KeyboardEvent){ const isCmdK = String(e.key).toLowerCase()==='k' && (e.metaKey||e.ctrlKey); if(e.key==='/'||isCmdK){e.preventDefault();setOpen(true)}; if(e.key==='Escape') setOpen(false) }
     window.addEventListener('keydown', onKey); return ()=>window.removeEventListener('keydown', onKey)
   },[])
   useEffect(()=>{
-    if(open){ const prev=document.body.style.overflow; document.body.style.overflow='hidden'; setTimeout(()=>{ const el=dialogRef.current?.querySelector?.('input'); el&&el.focus() },0); return ()=>{ document.body.style.overflow=prev } }
+    if(open){ const prev=document.body.style.overflow; document.body.style.overflow='hidden'; setTimeout(()=>{ const el=dialogRef.current?.querySelector<HTMLInputElement>('input'); el?.focus() },0); return ()=>{ document.body.style.overflow=prev } }
   },[open])
   return (
     <header className="sticky top-0 z-30 border-b border-black/10 dark:border-white/10 bg-white/60 dark:bg-black/60 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
-        <a className="font-bold tracking-tight text-xl" href="/">{profile.name}</a>
+        <Link className="font-bold tracking-tight text-xl" href="/">{profile.name}</Link>
         <nav className="hidden md:flex items-center gap-6 text-sm opacity-90">
           <a href="#ventures">Ventures</a><a href="#projects">Work</a><a href="#contact">Contact</a>
         </nav>
@@ -81,7 +84,7 @@ function Header(){
 }
 
 function BackgroundFX(){
-  const containerRef = useRef(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   useEffect(()=>{
     const el = containerRef.current; if(!el) return;
     for(let i=0;i<32;i++){ const s=document.createElement('span'); s.className='fx-particle'; s.style.setProperty('--x',Math.random().toFixed(3)); s.style.setProperty('--y',Math.random().toFixed(3)); s.style.setProperty('--d',(10+Math.random()*20).toFixed(2)); el.appendChild(s) }
@@ -96,13 +99,19 @@ function BackgroundFX(){
   )
 }
 
-function Section(props){ return <section id={props.id} className={cx('section','py-16',props.className)}>{props.children}</section> }
+  function Section(props: { id?: string; className?: string; children?: React.ReactNode }){ return <section id={props.id} className={cx('section','py-16',props.className)}>{props.children}</section> }
 
-function ProjectCard(props){
+  interface ProjectCardProps {
+    title: string
+    description: string
+    tags?: string[]
+    href?: string
+  }
+  function ProjectCard(props: ProjectCardProps){
   const content = (
     <motion.article initial={{opacity:0,y:30}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.5}} className="group rounded-2xl border border-black/10 dark:border-white/10 p-6 hover:shadow-2xl hover:-translate-y-0.5 transition bg-white/70 dark:bg-black/40 backdrop-blur">
       <h3 className="text-lg font-semibold">{props.title}</h3><p className="mt-2 text-sm opacity-80">{props.description}</p>
-      {props.tags && props.tags.length ? <div className="mt-3 flex flex-wrap gap-2">{props.tags.map((t)=><span key={t} className="text-[11px] px-2 py-0.5 rounded-full border border-black/10 dark:border-white/10 opacity-80">{t}</span>)}</div> : null}
+        {props.tags && props.tags.length ? <div className="mt-3 flex flex-wrap gap-2">{props.tags.map((t: string)=><span key={t} className="text-[11px] px-2 py-0.5 rounded-full border border-black/10 dark:border-white/10 opacity-80">{t}</span>)}</div> : null}
     </motion.article>
   )
   return props.href ? <a href={props.href} target="_blank" rel="noreferrer noopener">{content}</a> : content
@@ -184,12 +193,12 @@ export default function Page(){
 }
 
 // TESTS — keep existing + add a few more
-function Badge(props){ return (<span style={{ display:'inline-block', marginRight:8, padding:'2px 6px', borderRadius:6, background: props.ok ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: props.ok ? '#16a34a' : '#ef4444', fontSize:11, border:`1px solid ${props.ok ? 'rgba(34,197,94,.4)' : 'rgba(239,68,68,.4)'}` }}>{props.label}</span>) }
+  function Badge(props: { label: string; ok: boolean }){ return (<span style={{ display:'inline-block', marginRight:8, padding:'2px 6px', borderRadius:6, background: props.ok ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: props.ok ? '#16a34a' : '#ef4444', fontSize:11, border:`1px solid ${props.ok ? 'rgba(34,197,94,.4)' : 'rgba(239,68,68,.4)'}` }}>{props.label}</span>) }
 
-function TestRunner(){
-  const [checks,setChecks] = useState([])
-  useEffect(()=>{
-    const r = []
+  function TestRunner(){
+    const [checks,setChecks] = useState<{label: string; ok: boolean}[]>([])
+    useEffect(()=>{
+      const r: {label: string; ok: boolean}[] = []
     const t1 = typeof cx === 'function'; console.assert(t1,'Test 1 failed: cx should be a function'); r.push({label:'cx available', ok:t1})
     const t2 = !!document.getElementById('hero') && !!document.getElementById('projects'); console.assert(t2,'Test 2 failed: #hero and/or #projects missing'); r.push({label:'sections present', ok:t2})
     const t3 = !!document.querySelector('header'); console.assert(t3,'Test 3 failed: <header> missing'); r.push({label:'header present', ok:t3})
