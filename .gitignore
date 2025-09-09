@@ -1,1 +1,19 @@
-node_modules
+# Next.js
+.next/
+out/
+*.pid
+*.log
+
+# Dependencies
+node_modules/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# OS & editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
