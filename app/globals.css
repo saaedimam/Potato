@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light dark; }
+html { scroll-behavior: smooth; }
+
+/* Background FX palette tuned to cyan/indigo */
+.fx-layer{ isolation:isolate }
+.fx-gradient{background:
+  radial-gradient(1100px 500px at 15% 15%, rgba(34,211,238,.45) 0%, transparent 60%),
+  radial-gradient(1000px 500px at 85% 20%, rgba(99,102,241,.40) 0%, transparent 60%),
+  radial-gradient(1000px 560px at 20% 85%, rgba(56,189,248,.35) 0%, transparent 60%),
+  radial-gradient(900px 600px at 80% 80%, rgba(59,130,246,.35) 0%, transparent 60%);
+  filter: blur(40px); opacity:.5; }
+.dark .fx-gradient{ opacity:.45 }
+
+/* Blobs */
+.fx-blob{ position:absolute; width:40vw; height:40vw; max-width:720px; max-height:720px; border-radius:50%; filter:blur(40px); opacity:.25; mix-blend:plus-lighter; }
+.fx-blob-a{ background:linear-gradient(120deg,#22d3ee,#f59e0b); left:-10vw; top:-10vh; animation:floatA 22s ease-in-out infinite alternate; }
+.fx-blob-b{ background:linear-gradient(120deg,#60a5fa,#a78bfa); right:-8vw; top:10vh; animation:floatB 26s ease-in-out infinite alternate; }
+.fx-blob-c{ background:linear-gradient(120deg,#34d399,#22d3ee); left:15vw; bottom:-12vh; animation:floatC 28s ease-in-out infinite alternate; }
+@keyframes floatA{ from{transform:translate3d(0,0,0)} to{transform:translate3d(4vw,6vh,0) rotate(8deg)} }
+@keyframes floatB{ from{transform:translate3d(0,0,0)} to{transform:translate3d(-3vw,5vh,0) rotate(-6deg)} }
+@keyframes floatC{ from{transform:translate3d(0,0,0)} to{transform:translate3d(5vw,-4vh,0) rotate(10deg)} }
+
+/* Tiny particles */
+.fx-particle{ position:absolute; width:6px; height:6px; border-radius:9999px; background:rgba(255,255,255,.6); left:calc(var(--x) * 100%); top:calc(var(--y) * 100%); animation: drift var(--d)s linear infinite; }
+.dark .fx-particle{ background:rgba(255,255,255,.35) }
+@keyframes drift{ 0%{ transform:translate3d(0,0,0) scale(.8) } 50%{ transform:translate3d(20px,-30px,0) scale(1) } 100%{ transform:translate3d(-10px,20px,0) scale(.8) } }
+
+/* Buttons */
+.btn-ghost{ border:1px solid currentColor; border-radius:.9rem; padding:.5rem .75rem; transition:all .2s ease }
+.btn-ghost:hover{ background:currentColor; color:var(--btn-fg,#fff) }
+.dark .btn-ghost:hover{ color:#000 }
+
+/* Neon card accents */
+.neon-card{ box-shadow: 0 0 0 1px rgba(34,211,238,.18) inset, 0 10px 50px rgba(34,211,238,.08); }
+
