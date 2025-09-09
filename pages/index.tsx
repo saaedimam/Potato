@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Moon, Sun } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 
-function cx() { return Array.from(arguments).filter(Boolean).join(' ') }
+function cx(...classes: Array<string | false | undefined | null>) { return classes.filter(Boolean).join(' ') }
 
 const profile = {
   name: 'Saaed Imam',
@@ -42,18 +44,18 @@ function ThemeToggle(){
 
 function Header(){
   const [open,setOpen] = useState(false)
-  const dialogRef = useRef(null)
+  const dialogRef = useRef<HTMLDivElement | null>(null)
   useEffect(()=>{
-    function onKey(e){ const isCmdK = String(e.key).toLowerCase()==='k' && (e.metaKey||e.ctrlKey); if(e.key==='/'||isCmdK){e.preventDefault();setOpen(true)}; if(e.key==='Escape') setOpen(false) }
+    function onKey(e: KeyboardEvent){ const isCmdK = String(e.key).toLowerCase()==='k' && (e.metaKey||e.ctrlKey); if(e.key==='/'||isCmdK){e.preventDefault();setOpen(true)}; if(e.key==='Escape') setOpen(false) }
     window.addEventListener('keydown', onKey); return ()=>window.removeEventListener('keydown', onKey)
   },[])
   useEffect(()=>{
-    if(open){ const prev=document.body.style.overflow; document.body.style.overflow='hidden'; setTimeout(()=>{ const el=dialogRef.current?.querySelector?.('input'); el&&el.focus() },0); return ()=>{ document.body.style.overflow=prev } }
+    if(open){ const prev=document.body.style.overflow; document.body.style.overflow='hidden'; setTimeout(()=>{ const el = dialogRef.current?.querySelector('input') as HTMLInputElement | null; el&&el.focus() },0); return ()=>{ document.body.style.overflow=prev } }
   },[open])
   return (
     <header className="sticky top-0 z-30 border-b border-black/10 dark:border-white/10 bg-white/60 dark:bg-black/60 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
-        <a className="font-bold tracking-tight text-xl" href="/">{profile.name}</a>
+        <Link className="font-bold tracking-tight text-xl" href="/">{profile.name}</Link>
         <nav className="hidden md:flex items-center gap-6 text-sm opacity-90">
           <a href="#ventures">Ventures</a><a href="#projects">Work</a><a href="#contact">Contact</a>
         </nav>
@@ -81,11 +83,11 @@ function Header(){
 }
 
 function BackgroundFX(){
-  const containerRef = useRef(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   useEffect(()=>{
     const el = containerRef.current; if(!el) return;
     for(let i=0;i<32;i++){ const s=document.createElement('span'); s.className='fx-particle'; s.style.setProperty('--x',Math.random().toFixed(3)); s.style.setProperty('--y',Math.random().toFixed(3)); s.style.setProperty('--d',(10+Math.random()*20).toFixed(2)); el.appendChild(s) }
-    return ()=>{ const el2=containerRef.current; if(el2){ while(el2.firstChild) el2.removeChild(el2.firstChild) } }
+    return ()=>{ while(el.firstChild) el.removeChild(el.firstChild) }
   },[])
   return (
     <div aria-hidden ref={containerRef} className="fx-layer pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -96,16 +98,18 @@ function BackgroundFX(){
   )
 }
 
-function Section(props){ return <section id={props.id} className={cx('section','py-16',props.className)}>{props.children}</section> }
+interface SectionProps { id?: string; className?: string; children?: React.ReactNode }
+function Section({id, className, children}: SectionProps){ return <section id={id} className={cx('section','py-16',className)}>{children}</section> }
 
-function ProjectCard(props){
+interface ProjectCardProps { title: string; description: string; tags?: string[]; href?: string }
+function ProjectCard({title, description, tags, href}: ProjectCardProps){
   const content = (
     <motion.article initial={{opacity:0,y:30}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.5}} className="group rounded-2xl border border-black/10 dark:border-white/10 p-6 hover:shadow-2xl hover:-translate-y-0.5 transition bg-white/70 dark:bg-black/40 backdrop-blur">
-      <h3 className="text-lg font-semibold">{props.title}</h3><p className="mt-2 text-sm opacity-80">{props.description}</p>
-      {props.tags && props.tags.length ? <div className="mt-3 flex flex-wrap gap-2">{props.tags.map((t)=><span key={t} className="text-[11px] px-2 py-0.5 rounded-full border border-black/10 dark:border-white/10 opacity-80">{t}</span>)}</div> : null}
+      <h3 className="text-lg font-semibold">{title}</h3><p className="mt-2 text-sm opacity-80">{description}</p>
+      {tags && tags.length ? <div className="mt-3 flex flex-wrap gap-2">{tags.map((t)=><span key={t} className="text-[11px] px-2 py-0.5 rounded-full border border-black/10 dark:border-white/10 opacity-80">{t}</span>)}</div> : null}
     </motion.article>
   )
-  return props.href ? <a href={props.href} target="_blank" rel="noreferrer noopener">{content}</a> : content
+  return href ? <a href={href} target="_blank" rel="noreferrer noopener">{content}</a> : content
 }
 
 function Footer(){ return (
@@ -131,7 +135,7 @@ export default function Page(){
             <p className="mt-6 text-lg md:text-xl max-w-2xl mx-auto opacity-80">{profile.summary}</p>
             <div className="mt-10 mx-auto max-w-5xl">
               <div className="relative rounded-3xl overflow-hidden border border-black/10 dark:border-white/10 shadow-2xl">
-                <img src="/hero.jpg" alt="Showcase" className="w-full h-auto object-cover"/>
+                <Image src="/hero.jpg" alt="Showcase" fill className="object-cover"/>
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-black/0 to-white/10 dark:to-white/10"/>
               </div>
               <p className="text-xs opacity-70 mt-2">Tip: place a ~1600×900 JPG at /public/hero.jpg</p>
@@ -178,31 +182,33 @@ export default function Page(){
         .btn-ghost:hover{ background:currentColor; color:var(--btn-fg,#fff) }
         .dark .btn-ghost:hover{ color:#000 }
       `}</style>
-      <TestRunner/>
+      {process.env.NODE_ENV !== 'production' && TestRunner && <TestRunner/>}
     </div>
   )
 }
-
-// TESTS — keep existing + add a few more
-function Badge(props){ return (<span style={{ display:'inline-block', marginRight:8, padding:'2px 6px', borderRadius:6, background: props.ok ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: props.ok ? '#16a34a' : '#ef4444', fontSize:11, border:`1px solid ${props.ok ? 'rgba(34,197,94,.4)' : 'rgba(239,68,68,.4)'}` }}>{props.label}</span>) }
-
-function TestRunner(){
-  const [checks,setChecks] = useState([])
-  useEffect(()=>{
-    const r = []
-    const t1 = typeof cx === 'function'; console.assert(t1,'Test 1 failed: cx should be a function'); r.push({label:'cx available', ok:t1})
-    const t2 = !!document.getElementById('hero') && !!document.getElementById('projects'); console.assert(t2,'Test 2 failed: #hero and/or #projects missing'); r.push({label:'sections present', ok:t2})
-    const t3 = !!document.querySelector('header'); console.assert(t3,'Test 3 failed: <header> missing'); r.push({label:'header present', ok:t3})
-    const t4 = !!document.querySelector('.btn-ghost svg'); console.assert(t4,'Test 4 failed: theme toggle icon not found'); r.push({label:'theme toggle renders', ok:t4})
-    const t5 = !!Array.from(document.querySelectorAll('button')).find(b=> (b.textContent||'').includes('Command')); console.assert(t5,'Test 5 failed: Command palette button not found'); r.push({label:'cmd palette button', ok:t5})
-    const t6 = !!document.querySelector('main'); console.assert(t6,'Test 6 failed: <main> not present'); r.push({label:'main present', ok:t6})
-    const t7 = !!document.querySelector("a[href^='mailto:']"); console.assert(t7,'Test 7 failed: mailto link missing'); r.push({label:'mailto present', ok:t7})
-    const t8 = document.querySelectorAll('.group.rounded-2xl, .group.rounded-xl').length >= 3; console.assert(t8,'Test 8 failed: expected at least 3 project cards'); r.push({label:'cards render', ok:t8})
-    const t9 = !!document.querySelector('.fx-gradient'); console.assert(t9,'Test 9 failed: multicolor gradient missing'); r.push({label:'gradient active', ok:t9})
-    const t10 = !!document.querySelector('.fx-blob'); console.assert(t10,'Test 10 failed: blobs missing'); r.push({label:'blobs active', ok:t10})
-    const t11 = document.querySelectorAll('.fx-particle').length >= 10; console.assert(t11,'Test 11 failed: particles not seeded'); r.push({label:'particles seeded', ok:t11})
-    const t12 = !!document.querySelector('header .btn-ghost'); console.assert(t12,'Test 12 failed: theme toggle button missing'); r.push({label:'toggle button present', ok:t12})
-    setChecks(r)
-  },[])
-  return (<div style={{ position:'fixed', left:10, bottom:10, zIndex:9999 }}>{checks.map(c=> <Badge key={c.label} ok={c.ok} label={c.label}/>)}</div>)
+let TestRunner: React.ComponentType | null = null
+if(process.env.NODE_ENV !== 'production'){
+  interface BadgeProps { label: string; ok: boolean }
+  const Badge = ({label, ok}: BadgeProps) => (<span style={{ display:'inline-block', marginRight:8, padding:'2px 6px', borderRadius:6, background: ok ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)', color: ok ? '#16a34a' : '#ef4444', fontSize:11, border:`1px solid ${ok ? 'rgba(34,197,94,.4)' : 'rgba(239,68,68,.4)'}` }}>{label}</span>)
+  type Check = { label: string; ok: boolean }
+  TestRunner = function TestRunner(){
+    const [checks,setChecks] = useState<Check[]>([])
+    useEffect(()=>{
+      const r: Check[] = []
+      const t1 = typeof cx === 'function'; console.assert(t1,'Test 1 failed: cx should be a function'); r.push({label:'cx available', ok:t1})
+      const t2 = !!document.getElementById('hero') && !!document.getElementById('projects'); console.assert(t2,'Test 2 failed: #hero and/or #projects missing'); r.push({label:'sections present', ok:t2})
+      const t3 = !!document.querySelector('header'); console.assert(t3,'Test 3 failed: <header> missing'); r.push({label:'header present', ok:t3})
+      const t4 = !!document.querySelector('.btn-ghost svg'); console.assert(t4,'Test 4 failed: theme toggle icon not found'); r.push({label:'theme toggle renders', ok:t4})
+      const t5 = !!Array.from(document.querySelectorAll('button')).find(b=> (b.textContent||'').includes('Command')); console.assert(t5,'Test 5 failed: Command palette button not found'); r.push({label:'cmd palette button', ok:t5})
+      const t6 = !!document.querySelector('main'); console.assert(t6,'Test 6 failed: <main> not present'); r.push({label:'main present', ok:t6})
+      const t7 = !!document.querySelector("a[href^='mailto:']"); console.assert(t7,'Test 7 failed: mailto link missing'); r.push({label:'mailto present', ok:t7})
+      const t8 = document.querySelectorAll('.group.rounded-2xl, .group.rounded-xl').length >= 3; console.assert(t8,'Test 8 failed: expected at least 3 project cards'); r.push({label:'cards render', ok:t8})
+      const t9 = !!document.querySelector('.fx-gradient'); console.assert(t9,'Test 9 failed: multicolor gradient missing'); r.push({label:'gradient active', ok:t9})
+      const t10 = !!document.querySelector('.fx-blob'); console.assert(t10,'Test 10 failed: blobs missing'); r.push({label:'blobs active', ok:t10})
+      const t11 = document.querySelectorAll('.fx-particle').length >= 10; console.assert(t11,'Test 11 failed: particles not seeded'); r.push({label:'particles seeded', ok:t11})
+      const t12 = !!document.querySelector('header .btn-ghost'); console.assert(t12,'Test 12 failed: theme toggle button missing'); r.push({label:'toggle button present', ok:t12})
+      setChecks(r)
+    },[])
+    return (<div style={{ position:'fixed', left:10, bottom:10, zIndex:9999 }}>{checks.map(c=> <Badge key={c.label} ok={c.ok} label={c.label}/>)}</div>)
+  }
 }
